@@ -1,0 +1,19 @@
+zookeeper:
+  image:
+    repository: confluentinc/cp-zookeeper
+    tag: "7.5.0"
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      memory: "256Mi"
+
+kafka:
+  image:
+    repository: confluentinc/cp-kafka
+    tag: "7.5.0"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"

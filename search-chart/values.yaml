@@ -1,0 +1,93 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/devops-master-projects/search-service
+  pullPolicy: Always
+  tag: "sha-3b25d38"
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+nameOverride: ""
+fullnameOverride: "search-service"
+
+service:
+  type: ClusterIP
+  port: 8087
+  targetPort: 8087
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: ""
+      paths:
+        - path: /api/search
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+springboot:
+  profiles: "prod"
+
+# Elasticsearch configuration
+elasticsearch:
+  uris: "http://elasticsearch-service:9200"
+
+# Keycloak configuration
+keycloak:
+  serverUrl: "http://keycloak-service:8080"
+  realm: "IdentityRealm"
+
+# Kafka configuration
+kafka:
+  bootstrapServers: "kafka-service:9092"
+  consumerGroupId: "search-service"
+  autoOffsetReset: "earliest"
+
+# CORS configuration
+cors:
+  allowedOrigins: "http://localhost:5173"
+
+env:
+  - name: SERVER_PORT
+    value: "8087"
+  - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_KAFKA
+    value: "INFO"
+  - name: LOGGING_LEVEL_ORG_APACHE_KAFKA
+    value: "INFO"
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /actuator/health
+    port: 8087
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /actuator/health
+    port: 8087
+  initialDelaySeconds: 45
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80

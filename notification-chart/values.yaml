@@ -1,0 +1,91 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/devops-master-projects/notification-service
+  pullPolicy: Always
+  tag: "sha-531f654"
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+nameOverride: ""
+fullnameOverride: "notification-service"
+
+service:
+  type: ClusterIP
+  port: 8088
+  targetPort: 8088
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: ""
+      paths:
+        - path: /api/notifications
+          pathType: Prefix
+        - path: /ws
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+springboot:
+  profiles: "prod"
+
+# Database configuration
+database:
+  host: "notification-postgres-service"
+  port: "5432"
+  name: "notification"
+  username: "admin"
+  password: "password"
+
+# Keycloak configuration
+keycloak:
+  serverUrl: "http://keycloak-service:8080"
+  realm: "IdentityRealm"
+
+# Kafka configuration
+kafka:
+  bootstrapServers: "kafka-service:9092"
+  consumerGroupId: "notification-service"
+  autoOffsetReset: "earliest"
+
+# Other services
+services:
+  accommodationUrl: "http://accommodation-service:8085"
+
+env:
+  - name: SERVER_PORT
+    value: "8088"
+  - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+    value: "update"
+  - name: SPRING_JPA_OPEN_IN_VIEW
+    value: "false"
+  - name: SPRING_JPA_SHOW_SQL
+    value: "false"
+  - name: SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT
+    value: "0"
+
+livenessProbe:
+  enabled: false
+
+readinessProbe:
+  enabled: false
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
