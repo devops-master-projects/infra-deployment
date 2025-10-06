@@ -3,4 +3,4 @@ name: accommodation-service
 description: A Helm chart for Accommodation Service (Spring Boot)
 type: application
 version: 1.0.0
-appVersion: "sha-2d9e461"
+appVersion: "sha-6af7fdd"

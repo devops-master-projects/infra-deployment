@@ -3,4 +3,4 @@ name: notification-service
 description: A Helm chart for Notification Service (Spring Boot with WebSocket)
 type: application
 version: 1.0.0
-appVersion: "sha-531f654"
+appVersion: "sha-fa50e7a"

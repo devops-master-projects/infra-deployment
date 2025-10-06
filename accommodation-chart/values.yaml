@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/devops-master-projects/accommodation-service
   pullPolicy: Always
-  tag: "sha-2d9e461"
+  tag: "sha-6af7fdd"
 
 imagePullSecrets:
   - name: ghcr-secret

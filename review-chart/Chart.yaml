@@ -3,4 +3,4 @@ name: review-service
 description: A Helm chart for Review Service (Spring Boot)
 type: application
 version: 1.0.0
-appVersion: "sha-521bc2b"
+appVersion: "sha-83728c2"
