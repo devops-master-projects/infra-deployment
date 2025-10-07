@@ -3,4 +3,4 @@ name: booking-service
 description: A Helm chart for Booking Service (Spring Boot)
 type: application
 version: 1.0.0
-appVersion: "sha-c22c7d9"
+appVersion: "sha-5ebf8bd"
