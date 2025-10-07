@@ -39,7 +39,7 @@ resources:
 springboot:
   profiles: "prod"
 
-# Database configuration (u istom stilu kao booking-service)
+# Database configuration
 database:
   host: "accommodation-postgres-service"
   port: "5432"
@@ -56,12 +56,45 @@ keycloak:
 kafka:
   bootstrapServers: "kafka-service:9092"
 
-# (Ako ti treba URL na druge servise, ostavi sekciju za kasnije)
-services: {}
+# Observability configuration
+observability:
+  tempoOtlp: "http://tempo:4318/v1/traces"
+  lokiUrl: "http://loki:3100"
 
+# Environment variables
 env:
   - name: SERVER_PORT
     value: "8085"
+  
+  # === OBSERVABILITY - DODATO ===
+  - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+    value: "health,info,prometheus,metrics"
+  - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+    value: "always"
+  - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+    value: "true"
+  
+  # Metrics tags
+  - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+    value: "accommodation-service"
+  - name: MANAGEMENT_METRICS_TAGS_ENVIRONMENT
+    value: "kubernetes"
+  
+  # Tracing
+  - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+    value: "1.0"
+  - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+    value: "http://tempo:4318/v1/traces"
+  
+  # Loki
+  - name: LOKI_URL
+    value: "http://loki:3100"
+  
+  # Info endpoint
+  - name: MANAGEMENT_INFO_ENV_ENABLED
+    value: "true"
+  
+  # === JPA SETTINGS ===
   - name: SPRING_JPA_HIBERNATE_DDL_AUTO
     value: "update"
   - name: SPRING_JPA_OPEN_IN_VIEW
@@ -70,12 +103,33 @@ env:
     value: "false"
   - name: SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT
     value: "0"
+  
+  # Logging levels
+  - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY
+    value: "INFO"
+  - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
+    value: "INFO"
 
+# Health probes
 livenessProbe:
-  enabled: false
+  enabled: true
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8085
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
 
 readinessProbe:
-  enabled: false
+  enabled: true
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8085
+  initialDelaySeconds: 45
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
 
 autoscaling:
   enabled: false
