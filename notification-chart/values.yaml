@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/devops-master-projects/notification-service
   pullPolicy: Always
-  tag: "sha-fa50e7a"
+  tag: "sha-71a0371"
 
 imagePullSecrets:
   - name: ghcr-secret
