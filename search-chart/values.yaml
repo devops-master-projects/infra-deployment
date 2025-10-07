@@ -62,18 +62,65 @@ kafka:
 cors:
   allowedOrigins: "http://localhost:5173"
 
+# Observability configuration
+observability:
+  tempoOtlp: "http://tempo:4318/v1/traces"
+  lokiUrl: "http://loki:3100"
+
+# Environment variables
 env:
   - name: SERVER_PORT
     value: "8087"
+  
+  # === OBSERVABILITY - DODATO ===
+  - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+    value: "health,info,prometheus,metrics"
+  - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+    value: "always"
+  - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
+    value: "true"
+  - name: MANAGEMENT_HEALTH_LIVENESSSTATE_ENABLED
+    value: "true"
+  - name: MANAGEMENT_HEALTH_READINESSSTATE_ENABLED
+    value: "true"
+  - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+    value: "true"
+  
+  # Metrics tags
+  - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+    value: "search-service"
+  - name: MANAGEMENT_METRICS_TAGS_ENVIRONMENT
+    value: "kubernetes"
+  
+  # Tracing
+  - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+    value: "1.0"
+  - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+    value: "http://tempo:4318/v1/traces"
+  
+  # Loki
+  - name: LOKI_URL
+    value: "http://loki:3100"
+  
+  # Info endpoint
+  - name: MANAGEMENT_INFO_ENV_ENABLED
+    value: "true"
+  
+  # Logging levels
   - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_KAFKA
     value: "INFO"
   - name: LOGGING_LEVEL_ORG_APACHE_KAFKA
     value: "INFO"
+  - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY
+    value: "INFO"
+  - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
+    value: "INFO"
 
+# Health probes
 livenessProbe:
   enabled: true
   httpGet:
-    path: /actuator/health
+    path: /actuator/health/liveness
     port: 8087
   initialDelaySeconds: 60
   periodSeconds: 30
@@ -83,7 +130,7 @@ livenessProbe:
 readinessProbe:
   enabled: true
   httpGet:
-    path: /actuator/health
+    path: /actuator/health/readiness
     port: 8087
   initialDelaySeconds: 45
   periodSeconds: 10
