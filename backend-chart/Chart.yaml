@@ -3,4 +3,4 @@ name: identity-service
 description: A Helm chart for Identity Service (Spring Boot)
 type: application
 version: 1.0.0
-appVersion: "sha-72bffa4"
+appVersion: "sha-f55f355"

@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/devops-master-projects/identity-service
   pullPolicy: Always
-  tag: "sha-72bffa4"
+  tag: "sha-f55f355"
 
 imagePullSecrets:
   - name: ghcr-secret
@@ -52,7 +52,7 @@ keycloak:
   serverUrl: "http://keycloak-service:8080"
   realm: "IdentityRealm"
   clientId: "identity-service"
-  clientSecret: "HI29QC3OgnziKKXuuFMkt71ebIKGr7EW"
+  clientSecret: "mM0Y1phi6QcmDJJRemR6k4NXVgiV1E2l"
 
 # Kafka configuration - ostavite ako nemate Kafka
 kafka:
