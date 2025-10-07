@@ -3,4 +3,4 @@ name: search-service
 description: A Helm chart for Search Service (Spring Boot with Elasticsearch)
 type: application
 version: 1.0.0
-appVersion: "sha-3b25d38"
+appVersion: "sha-d958152"

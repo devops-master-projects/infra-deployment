@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/devops-master-projects/search-service
   pullPolicy: Always
-  tag: "sha-3b25d38"
+  tag: "sha-d958152"
 
 imagePullSecrets:
   - name: ghcr-secret
@@ -53,6 +53,10 @@ kafka:
   bootstrapServers: "kafka-service:9092"
   consumerGroupId: "search-service"
   autoOffsetReset: "earliest"
+  consumer:
+    keyDeserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+    valueDeserializer: "org.springframework.kafka.support.serializer.JsonDeserializer"
+    trustedPackages: "org.example.search.dto"
 
 # CORS configuration
 cors:
