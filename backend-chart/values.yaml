@@ -39,7 +39,6 @@ resources:
 springboot:
   profiles: "prod"
   
-# Database configuration - koristi postgres-service iz K8s
 database:
   host: "postgres-service"
   port: "5432"
@@ -47,26 +46,57 @@ database:
   username: "admin"
   password: "password"
 
-# Keycloak configuration - VAŽNO: ažurirano
 keycloak:
   serverUrl: "http://keycloak-service:8080"
   realm: "IdentityRealm"
   clientId: "identity-service"
   clientSecret: "mM0Y1phi6QcmDJJRemR6k4NXVgiV1E2l"
 
-# Kafka configuration - ostavite ako nemate Kafka
 kafka:
   bootstrapServers: "kafka-service:9092"
   groupId: "identity-service-group"
 
-# Additional environment variables
+# Observability configuration
+observability:
+  tempoOtlp: "http://tempo:4318/v1/traces"
+  lokiUrl: "http://loki:3100"
+
+# Environment variables
 env:
   - name: SERVER_PORT
     value: "8082"
+  
+  # Actuator & Metrics
   - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
-    value: "health,info,prometheus"
+    value: "health,info,prometheus,metrics"
+  - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+    value: "always"
   - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
     value: "true"
+  - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+    value: "true"
+  
+  # Metrics tags
+  - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+    value: "identity-service"
+  - name: MANAGEMENT_METRICS_TAGS_ENVIRONMENT
+    value: "kubernetes"
+  
+  # Tracing
+  - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+    value: "1.0"
+  - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+    value: "http://tempo:4318/v1/traces"
+  
+  # Loki
+  - name: LOKI_URL
+    value: "http://loki:3100"
+  
+  # Info endpoint
+  - name: MANAGEMENT_INFO_ENV_ENABLED
+    value: "true"
+  
+  # JPA
   - name: SPRING_JPA_HIBERNATE_DDL_AUTO
     value: "update"
   - name: SPRING_JPA_OPEN_IN_VIEW
@@ -75,17 +105,29 @@ env:
     value: "false"
   - name: SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT
     value: "0"
+  
+  # Service URLs
   - name: NOTIFICATION_SERVICE_URL
     value: "http://notification-service:8088"
+  - name: BOOKING_SERVICE_URL
+    value: "http://reservation-service:8086"
+  - name: ACCOMMODATION_SERVICE_URL
+    value: "http://accommodation-service:8085"
+  
+  # Logging levels
+  - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY
+    value: "INFO"
+  - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
+    value: "INFO"
 
 livenessProbe:
   enabled: true
   httpGet:
     path: /actuator/health/liveness
     port: 8082
-  initialDelaySeconds: 40
+  initialDelaySeconds: 60
   periodSeconds: 30
-  timeoutSeconds: 3
+  timeoutSeconds: 5
   failureThreshold: 3
 
 readinessProbe:
@@ -93,9 +135,9 @@ readinessProbe:
   httpGet:
     path: /actuator/health/readiness
     port: 8082
-  initialDelaySeconds: 30
+  initialDelaySeconds: 45
   periodSeconds: 10
-  timeoutSeconds: 3
+  timeoutSeconds: 5
   failureThreshold: 3
 
 autoscaling:
