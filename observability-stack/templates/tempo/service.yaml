@@ -1,0 +1,26 @@
+{{- if .Values.tempo.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: tempo
+spec:
+  type: {{ .Values.tempo.service.type }}
+  ports:
+  - port: {{ .Values.tempo.service.http }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  - port: {{ .Values.tempo.service.grpc }}
+    targetPort: grpc
+    protocol: TCP
+    name: grpc
+  - port: {{ .Values.tempo.service.otlpHttp }}
+    targetPort: otlp-http
+    protocol: TCP
+    name: otlp-http
+  selector:
+    app: tempo
+{{- end }}
