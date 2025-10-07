@@ -1,0 +1,25 @@
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/traces
+    wal:
+      path: /tmp/tempo/wal
+
+# Uklonio 'enabled' field koji ne postoji u novijim verzijama
+query_frontend:
+  search:
+    default_result_limit: 20
+    max_result_limit: 50

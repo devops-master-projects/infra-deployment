@@ -1,0 +1,58 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Identity Service
+  - job_name: 'identity-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8082']  # <-- PROMENI
+        labels:
+          service: 'identity'
+          environment: 'local'
+
+  # Accommodation Service
+  - job_name: 'accommodation-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8085']  # <-- PROMENI
+        labels:
+          service: 'accommodation'
+          environment: 'local'
+
+  # Reservation Service
+  - job_name: 'reservation-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8086']  # <-- PROMENI (isti port kao identity?)
+        labels:
+          service: 'reservation'
+          environment: 'local'
+
+  # Notification Service
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8088']  # <-- PROMENI
+        labels:
+          service: 'notification'
+          environment: 'local'
+
+  # Review Service
+  - job_name: 'review-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8089']  # <-- PROMENI
+        labels:
+          service: 'review'
+          environment: 'local'
+
+  # Search Service
+  - job_name: 'search-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8087']  # <-- PROMENI
+        labels:
+          service: 'search'
+          environment: 'local'
