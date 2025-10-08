@@ -1,0 +1,6 @@
+apiVersion: v2
+name: observability-stack
+description: Complete observability stack with Prometheus, Loki, Tempo, and Grafana
+type: application
+version: 1.0.0
+appVersion: "1.0"

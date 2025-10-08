@@ -1,0 +1,6 @@
+apiVersion: v2
+name: review-service
+description: A Helm chart for Review Service (Spring Boot)
+type: application
+version: 1.0.0
+appVersion: "sha-fdadfba"

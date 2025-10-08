@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "16"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+env:
+  - name: POSTGRES_USER
+    value: "admin"
+  - name: POSTGRES_PASSWORD
+    value: "password"
+  - name: POSTGRES_DB
+    value: "identity"

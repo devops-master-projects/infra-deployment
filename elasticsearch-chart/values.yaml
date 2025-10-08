@@ -1,0 +1,20 @@
+image:
+  repository: docker.elastic.co/elasticsearch/elasticsearch
+  tag: "8.15.0"
+  
+service:
+  port: 9200
+
+resources:
+  limits:
+    memory: "3Gi"  # Povećano sa 2Gi
+  requests:
+    memory: "2Gi"  # Povećano sa 1Gi
+
+env:
+  - name: discovery.type
+    value: "single-node"
+  - name: ES_JAVA_OPTS
+    value: "-Xms1536m -Xmx1536m"  # Povećano sa 1g
+  - name: xpack.security.enabled
+    value: "false"

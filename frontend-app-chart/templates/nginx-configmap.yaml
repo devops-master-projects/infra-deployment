@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frontend-app.fullname" . }}-nginx-config
+  labels:
+    {{- include "frontend-app.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    server {
+      listen 80;
+      server_name _;
+      root /usr/share/nginx/html;
+
+      # ----------------------------
+      # FIX za dupli /api po servisima
+      # ----------------------------
+
+      # Identity: /api/identity/api/... -> /api/...
+      location ~ ^/api/identity/api/(.*)$ {
+        rewrite ^/api/identity/api/(.*)$ /api/$1 break;
+        proxy_pass http://identity-service:8082;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      # Normalan prolaz
+      location /api/identity/ {
+        proxy_pass http://identity-service:8082/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Accommodations: /api/accommodations/api/... -> /api/...
+      location ~ ^/api/accommodations/api/(.*)$ {
+        rewrite ^/api/accommodations/api/(.*)$ /api/$1 break;
+        proxy_pass http://accommodation-service:8085;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+      # Normalan prolaz
+      location /api/accommodations/ {
+        proxy_pass http://accommodation-service:8085/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+
+      # Bookings: /api/bookings/api/... -> /api/...
+      location ~ ^/api/bookings/api/(.*)$ {
+        rewrite ^/api/bookings/api/(.*)$ /api/$1 break;
+        proxy_pass http://booking-service:8086;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+      # Normalan prolaz
+      location /api/bookings/ {
+        proxy_pass http://booking-service:8086/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+
+      # Search: /api/search/api/... -> /api/...
+      location ~ ^/api/search/api/(.*)$ {
+        rewrite ^/api/search/api/(.*)$ /api/$1 break;
+        proxy_pass http://search-service:8087;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+      # Normalan prolaz
+      location /api/search/ {
+        proxy_pass http://search-service:8087/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+
+      # Notifications (REST): /api/notifications/api/... -> /api/...
+      location ~ ^/api/notifications/api/(.*)$ {
+        rewrite ^/api/notifications/api/(.*)$ /api/$1 break;
+        proxy_pass http://notification-service:8088;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+      # Normalan prolaz
+      location /api/notifications/ {
+        proxy_pass http://notification-service:8088/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+
+      # WebSocket (prolazi preko /ws na frontend servisu)
+      location /ws {
+        proxy_pass http://notification-service:8088/ws;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+      }
+
+      # SPA fallback
+      location / {
+        try_files $uri /index.html;
+      }
+    }

@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "16-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+env:
+  - name: POSTGRES_USER
+    value: "reviews"
+  - name: POSTGRES_PASSWORD
+    value: "reviews"
+  - name: POSTGRES_DB
+    value: "reviewsdb"

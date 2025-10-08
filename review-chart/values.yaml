@@ -1,0 +1,136 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/devops-master-projects/review-service
+  pullPolicy: Always
+  tag: "sha-fdadfba"
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+nameOverride: ""
+fullnameOverride: "review-service"
+
+service:
+  type: ClusterIP
+  port: 8089
+  targetPort: 8089
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: ""
+      paths:
+        - path: /api/reviews
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+springboot:
+  profiles: "prod"
+
+# Database configuration
+database:
+  host: "review-postgres-service"
+  port: "5432"
+  name: "reviewsdb"
+  username: "reviews"
+  password: "reviews"
+
+# Keycloak configuration
+keycloak:
+  serverUrl: "http://keycloak-service:8080"
+  realm: "IdentityRealm"
+
+# Kafka configuration
+kafka:
+  bootstrapServers: "kafka-service:9092"
+
+# Other services
+services:
+  accommodationUrl: "http://accommodation-service:8085"
+
+# Observability configuration
+observability:
+  tempoOtlp: "http://tempo:4318/v1/traces"
+  lokiUrl: "http://loki:3100"
+
+# Environment variables
+env:
+  - name: SERVER_PORT
+    value: "8089"
+  
+  # === OBSERVABILITY - DODATO ===
+  - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+    value: "health,info,prometheus,metrics"
+  - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+    value: "always"
+  - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+    value: "true"
+  
+  # Metrics tags
+  - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+    value: "review-service"
+  - name: MANAGEMENT_METRICS_TAGS_ENVIRONMENT
+    value: "kubernetes"
+  
+  # Tracing
+  - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+    value: "1.0"
+  - name: MANAGEMENT_OTLP_TRACING_ENDPOINT
+    value: "http://tempo:4318/v1/traces"
+  
+  # Loki
+  - name: LOKI_URL
+    value: "http://loki:3100"
+  
+  # Info endpoint
+  - name: MANAGEMENT_INFO_ENV_ENABLED
+    value: "true"
+  
+  # === JPA SETTINGS ===
+  - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+    value: "update"
+  - name: SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT
+    value: "0"
+  - name: SPRING_JPA_OPEN_IN_VIEW
+    value: "false"
+  - name: SPRING_JPA_SHOW_SQL
+    value: "false"
+
+# Health probes
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8089
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8089
+  initialDelaySeconds: 45
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
