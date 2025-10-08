@@ -110,7 +110,7 @@ env:
   - name: NOTIFICATION_SERVICE_URL
     value: "http://notification-service:8088"
   - name: BOOKING_SERVICE_URL
-    value: "http://reservation-service:8086"
+    value: "http://booking-service:8086"
   - name: ACCOMMODATION_SERVICE_URL
     value: "http://accommodation-service:8085"
   

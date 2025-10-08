@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/devops-master-projects/frontend-app
   pullPolicy: Always
-  tag: "sha-a051c93"
+  tag: "sha-170f4f9"
 
 imagePullSecrets:
   - name: ghcr-secret

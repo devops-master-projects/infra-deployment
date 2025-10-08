@@ -3,4 +3,4 @@ name: frontend-app
 description: A Helm chart for Frontend Application with Nginx Reverse Proxy
 type: application
 version: 1.0.0
-appVersion: "sha-a051c93"
+appVersion: "sha-170f4f9"

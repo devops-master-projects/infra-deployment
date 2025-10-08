@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/devops-master-projects/search-service
   pullPolicy: Always
-  tag: "sha-d958152"
+  tag: "sha-275f886"
 
 imagePullSecrets:
   - name: ghcr-secret
