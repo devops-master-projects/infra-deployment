@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+  repository: docker.elastic.co/kibana/kibana
+  tag: "8.15.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5601
+
+elasticsearch:
+  hosts: '["http://elasticsearch-service:9200"]'
+  sslVerify: false
+
+security:
+  enabled: false
+
+logging:
+  level: info
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
+
+ingress:
+  enabled: false
+  className: nginx
+  host: kibana.local
+  annotations: {}
+  tls:
+    enabled: false
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

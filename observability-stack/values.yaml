@@ -1,0 +1,106 @@
+# Namespace
+namespace: default
+
+# Prometheus
+prometheus:
+  enabled: true
+  image:
+    repository: prom/prometheus
+    tag: latest
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 9090
+    nodePort: 30090  # Ako hoćeš NodePort
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  persistence:
+    enabled: false  # Stavi true za production
+    size: 10Gi
+
+# Loki
+loki:
+  enabled: true
+  image:
+    repository: grafana/loki
+    tag: latest
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 3100
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  persistence:
+    enabled: false
+    size: 10Gi
+
+# Tempo
+tempo:
+  enabled: true
+  image:
+    repository: grafana/tempo
+    tag: latest
+  replicas: 1
+  service:
+    type: ClusterIP
+    http: 3200
+    grpc: 4317
+    otlpHttp: 4318
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  persistence:
+    enabled: false
+    size: 10Gi
+
+# Grafana
+grafana:
+  enabled: true
+  image:
+    repository: grafana/grafana
+    tag: latest
+  replicas: 1
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30300
+  adminUser: admin
+  adminPassword: admin
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  persistence:
+    enabled: false
+    size: 5Gi
+
+# Promtail (log collector)
+promtail:
+  enabled: true
+  image:
+    repository: grafana/promtail
+    tag: latest
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi

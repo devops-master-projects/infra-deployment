@@ -1,0 +1,48 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: prometheus
+spec:
+  replicas: {{ .Values.prometheus.replicas }}
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: {{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--storage.tsdb.retention.time=7d'
+        ports:
+        - name: http
+          containerPort: 9090
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus
+        - name: storage
+          mountPath: /prometheus
+        resources:
+          {{- toYaml .Values.prometheus.resources | nindent 10 }}
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: storage
+        {{- if .Values.prometheus.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: prometheus-pvc
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+{{- end }}

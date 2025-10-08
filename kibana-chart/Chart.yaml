@@ -1,0 +1,6 @@
+apiVersion: v2
+name: kibana
+description: Kibana 8.x (dev-friendly, no security, HTTP to ES)
+type: application
+version: 1.0.0
+appVersion: "8.15.0"

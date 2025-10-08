@@ -1,0 +1,5 @@
+apiVersion: v2
+name: elasticsearch
+description: Single-node Elasticsearch
+version: 1.0.0
+appVersion: "8.15.0"
