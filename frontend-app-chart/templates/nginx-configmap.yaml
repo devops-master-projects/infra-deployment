@@ -39,12 +39,16 @@ data:
         proxy_pass http://accommodation-service:8085;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
       # Normalan prolaz
       location /api/accommodations/ {
         proxy_pass http://accommodation-service:8085/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
 
       # Bookings: /api/bookings/api/... -> /api/...
@@ -53,12 +57,16 @@ data:
         proxy_pass http://booking-service:8086;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
       # Normalan prolaz
       location /api/bookings/ {
         proxy_pass http://booking-service:8086/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
 
       # Search: /api/search/api/... -> /api/...
@@ -67,12 +75,16 @@ data:
         proxy_pass http://search-service:8087;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
       # Normalan prolaz
       location /api/search/ {
         proxy_pass http://search-service:8087/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
 
       # Notifications (REST): /api/notifications/api/... -> /api/...
@@ -81,15 +93,19 @@ data:
         proxy_pass http://notification-service:8088;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
       # Normalan prolaz
       location /api/notifications/ {
         proxy_pass http://notification-service:8088/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
       }
 
-      # WebSocket (prolazi preko /ws na frontend servisu)
+      # WebSocket
       location /ws {
         proxy_pass http://notification-service:8088/ws;
         proxy_http_version 1.1;
@@ -98,7 +114,120 @@ data:
         proxy_set_header Host $host;
       }
 
-      # SPA fallback
+      # ==============================================
+      # REVIEW SERVICE RULES - MORAJU BITI PRE SPA FALLBACK-A
+      # ==============================================
+
+      # Fix: /hosts/{hostId}/reviews/{reviewId}/undefined/api/reviews/hosts/{reviewId} (GET/EDIT pojedinacne)
+      location ~ ^/hosts/([^/]+)/reviews/([^/]+)/undefined/api/reviews/hosts/([^/]+)$ {
+        rewrite ^/hosts/([^/]+)/reviews/([^/]+)/undefined/api/reviews/hosts/([^/]+)$ /api/reviews/hosts/$3 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /hosts/undefined/api/reviews/hosts/{reviewId} (DELETE pojedinacne - BEZ /reviews na kraju!)
+      location ~ ^/hosts/undefined/api/reviews/hosts/([^/]+)$ {
+        rewrite ^/hosts/undefined/api/reviews/hosts/([^/]+)$ /api/reviews/hosts/$1 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /hosts/undefined/api/reviews/hosts/{id}/reviews (lista SA /reviews na kraju)
+      location ~ ^/hosts/undefined/api/reviews/hosts/([^/]+)/reviews(.*)$ {
+        rewrite ^/hosts/undefined/api/reviews/hosts/([^/]+)/reviews(.*)$ /api/reviews/hosts/$1/reviews$2 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /hosts/{id}/reviews/undefined/api/reviews/hosts (POST nova review)
+      location ~ ^/hosts/([^/]+)/reviews/undefined/api/reviews/hosts(.*)$ {
+        rewrite ^/hosts/([^/]+)/reviews/undefined/api/reviews/hosts(.*)$ /api/reviews/hosts$2 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /accommodations/undefined/api/reviews/accommodations/{id}
+      location ~ ^/accommodations/undefined/api/reviews/accommodations/([^/]+)(.*)$ {
+        rewrite ^/accommodations/undefined/api/reviews/accommodations/([^/]+)(.*)$ /api/reviews/accommodations/$1$2 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /accommodations/{id}/reviews/.../api/reviews/...
+      location ~ ^/accommodations/[^/]+/reviews/.*/api/reviews/(.*)$ {
+        rewrite ^/accommodations/[^/]+/reviews/.*/api/reviews/(.*)$ /api/reviews/$1 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /api/reviews/hosts/undefined/...
+      location ~ ^/api/reviews/hosts/undefined/(.*)$ {
+        rewrite ^/api/reviews/hosts/undefined/(.*)$ /api/reviews/hosts/4e9a3623-4424-4bba-b7b7-354fa6f753b1/$1 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /api/reviews/accommodations/undefined/...
+      location ~ ^/api/reviews/accommodations/undefined/(.*)$ {
+        rewrite ^/api/reviews/accommodations/undefined/(.*)$ /api/reviews/accommodations/1cd50aba-6c8e-44ab-b5f6-0ff6a0cae178/$1 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Fix: /api/accommodations/api/reviews/...
+      location ~ ^/api/accommodations/api/reviews/(.*)$ {
+        rewrite ^/api/accommodations/api/reviews/(.*)$ /api/reviews/$1 break;
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # Normal review service pass-through
+      location ^~ /api/reviews/ {
+        proxy_pass http://review-service:8089;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # SPA fallback - MORA BITI NA KRAJU!
       location / {
         try_files $uri /index.html;
       }

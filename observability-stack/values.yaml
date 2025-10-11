@@ -104,3 +104,31 @@ promtail:
     requests:
       cpu: 50m
       memory: 64Mi
+
+# Node Exporter - za host metrike
+nodeExporter:
+  enabled: true
+  image:
+    repository: prom/node-exporter
+    tag: v1.7.0
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 32Mi
+
+# cAdvisor - za container metrike
+cadvisor:
+  enabled: true
+  image:
+    repository: gcr.io/cadvisor/cadvisor
+    tag: v0.47.0
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

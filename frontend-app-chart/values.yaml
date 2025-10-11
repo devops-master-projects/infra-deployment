@@ -21,7 +21,7 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: ""
+    - host: "frontend.local"
       paths:
         - path: /
           pathType: Prefix
